@@ -1,0 +1,45 @@
+# Johannes Nagl
+
+> CEO at Swat.io by day. Indie hacker by night. Always dad.
+
+## About
+
+Johannes Nagl is the CEO Product at Swat.io, a bootstrapped SaaS company for social media management based in Vienna, Austria. He has over a decade of experience building and scaling SaaS products in Europe — without venture capital.
+
+He started as a programmer, grew through CTO into leadership, and now leads product and company strategy. He also builds indie projects on the side, including yetanother.one.
+
+## Key Facts
+
+- **Role**: CEO Product at Swat.io
+- **Location**: Vienna, Austria
+- **Education**: Master's in Multimedia & Software Engineering, UAS Technikum Wien
+- **Focus areas**: Bootstrapping, SaaS, product leadership, team building, sustainable growth
+- **Tech background**: PHP, Laravel, TypeScript, PostgreSQL, AWS
+
+## Links
+
+- Website: https://johannes.nagl.name
+- Side project: https://yetanother.one
+- LinkedIn: https://www.linkedin.com/in/johannesnagl/
+- Bluesky: https://bsky.app/profile/johannes.nagl.name
+- Company: https://swat.io
+
+## Career
+
+- **2011–present**: Swat.io — joined as 2nd employee, progressed from Project Manager → CTO → CEO → CEO Product
+- **2008–2011**: Büro DIE ANTWORT GmbH — Web Developer, Shareholder
+- **2008–2009**: Hagenberg Software GmbH — Developer, SharePoint Consultant
+- **2006–2007**: pmOne GmbH — Junior Consultant
+- **2004–2010**: siteworx.at — Freelancer
+
+## Recent Publications & Talks
+
+- Apr 2026: "Vom Entwickler zum CEO" — Hello, again. Podcast
+- Oct 2025: "The Future of Social Media in 2026" — DMEXCO Podcast
+- Apr 2025: "Swat.io: 14 Jahre Bootstrapping auf 7,3 Mio EUR Umsatz" — Happy Bootstrapping Podcast
+- Oct 2023: "Social Media & AI: Do's and Don'ts" — Swat.io AI Academy
+- Aug 2023: "Content- und Community Management mit KI" — Digital Marketing Upgrade Podcast
+
+## This Site
+
+This is a personal portfolio site. Single HTML page, no framework, no build step. Hosted on GitHub Pages at johannes.nagl.name.
