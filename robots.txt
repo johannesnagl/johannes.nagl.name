@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://johannes.nagl.name/sitemap.xml
