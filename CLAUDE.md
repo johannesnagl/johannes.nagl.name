@@ -180,6 +180,20 @@ instead of on the live site.
 
 Verify layout at roughly 375 / 768 / 1280 when changing anything structural.
 
+### The budget measures DESKTOP only
+
+`collect.settings.preset` is `desktop`, so the numbers in that file describe a
+desktop load and nothing else. Measured on 2026-09-18, mobile is materially
+worse: **CLS 0.138**, entirely attributed to `body > header.masthead > div`,
+against 0.000 on desktop. That predates the gate and has nothing to do with the
+timeline durations — it reproduces identically on the commit before they were
+fixed.
+
+Adding a mobile run to `.github/lighthouserc.json` would therefore fail the
+build immediately. Fix the masthead shift first, then add the mobile collection,
+in that order — otherwise the only way to get CI green again is to raise the
+budget, which is how a gate stops meaning anything.
+
 ### A category score of 1.00 is not a clean page
 
 Lighthouse weights some axe audits at **zero**, so an audit can score 0 while
