@@ -74,6 +74,29 @@ nothing local to say so. That is why `test/csp.test.mjs` does not store the
 hashes a second time — it recomputes them from `index.html` and compares them to
 the shipped policy. Forgetting to re-pin fails the gate instead of the site.
 
+### "Refused to apply a stylesheet" is usually a browser extension
+
+A hash-pinned `style-src` refuses CSS that content blockers inject, and Safari
+reports it against the PAGE — `(johannes.nagl.name, line 1, x2)` — which reads
+exactly like a defect in this repository. It is not. The giveaway is other
+console lines from the same extension: a message from `autoconsent.js` (the
+cookie-banner auto-dismisser in DuckDuckGo Privacy Essentials, Ghostery and
+others) cannot possibly come from this site, because `script-src` is pinned to
+three inline hashes with no `'self'` and no external origin. The page is
+incapable of loading an external script.
+
+Before believing such a report, check whether the page's OWN stylesheet applied:
+
+```js
+getComputedStyle(document.body).display   // "grid" = fine, "block" = really broken
+```
+
+`"grid"` means the policy is working as designed and the noise belongs to the
+viewer's browser. Do not loosen the policy to silence it: `'unsafe-inline'` is
+ignored whenever hashes are present, so the only way to stop the message is to
+un-pin the policy entirely, which trades a real protection for a quieter
+console in one person's browser.
+
 ### style-src also covers SVGs the page references
 
 `favicon.svg` contains a `<style>` block, and a `<style>` inside an SVG the page
