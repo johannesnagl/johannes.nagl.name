@@ -74,6 +74,20 @@ nothing local to say so. That is why `test/csp.test.mjs` does not store the
 hashes a second time — it recomputes them from `index.html` and compares them to
 the shipped policy. Forgetting to re-pin fails the gate instead of the site.
 
+### style-src also covers SVGs the page references
+
+`favicon.svg` contains a `<style>` block, and a `<style>` inside an SVG the page
+references is governed by **this page's** `style-src`, not by the SVG's own.
+WebKit enforces that for SVGs loaded as images and icons. The first pinned
+policy covered only `index.html`, so the browser refused the icon's stylesheet:
+the page rendered perfectly, the only symptom was a console line ("Refused to
+apply a stylesheet...") and a favicon that had quietly stopped following
+`prefers-color-scheme`.
+
+`scripts/csp-hashes.mjs` now walks every local `.svg` the page references and
+hashes its `<style>` blocks too, and `test/csp.test.mjs` asserts each one is
+covered. Edit `favicon.svg`'s CSS and the gate fails until you re-pin.
+
 `frame-ancestors`, `report-uri` and `sandbox` are ignored in a `<meta>` policy,
 so they are deliberately absent here rather than present and inert. They are not
 impossible, though: statichost.eu's edge already sends

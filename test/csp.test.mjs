@@ -10,7 +10,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { html, inlineBlocks } from "./helpers/site.mjs";
+import { html, inlineBlocks, svgStyleBlocks } from "./helpers/site.mjs";
 
 const sha256 = (body) => `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`;
 
@@ -37,14 +37,31 @@ test("script-src pins the hash of every inline script, and nothing else", () => 
 });
 
 test("style-src pins the hash of every inline style, and nothing else", () => {
-  const expected = inlineBlocks("style").map((b) => sha256(b.body)).sort();
+  // Including <style> inside referenced SVGs: those are governed by the PAGE's
+  // style-src, and omitting them refused favicon.svg's stylesheet in WebKit
+  // while the page itself rendered perfectly — a live defect visible only in
+  // the console, and the reason this test does not stop at index.html.
+  const expected = [
+    ...new Set([...inlineBlocks("style"), ...svgStyleBlocks()].map((b) => sha256(b.body))),
+  ].sort();
   const actual = policy().get("style-src") ?? [];
   assert.deepEqual(
     actual.filter((v) => v.startsWith("'sha256-")).sort(),
     expected,
-    "index.html's inline styles and the style-src hashes disagree. " +
-      "Re-pin with: node scripts/csp-hashes.mjs",
+    "the inline styles (index.html AND referenced SVGs) disagree with the " +
+      "style-src hashes. Re-pin with: node scripts/csp-hashes.mjs --write",
   );
+});
+
+test("every referenced SVG's stylesheet is covered by style-src", () => {
+  const pinned = policy().get("style-src") ?? [];
+  for (const block of svgStyleBlocks()) {
+    assert.ok(
+      pinned.includes(sha256(block.body)),
+      `${block.file} has a <style> block that style-src does not allow; ` +
+        "WebKit will refuse it and the icon will stop adapting to the colour scheme",
+    );
+  }
 });
 
 test("no directive falls back to 'unsafe-inline' or 'unsafe-eval'", () => {

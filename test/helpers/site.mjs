@@ -67,3 +67,23 @@ export const isTooling = (path) =>
   [/^test\//, /^scripts\//, /^package(-lock)?\.json$/, /^CLAUDE\.md$/, /^node_modules\//].some((r) =>
     r.test(path),
   );
+
+/**
+ * `<style>` bodies inside same-origin SVG assets the page references.
+ *
+ * These are subject to the PAGE's `style-src`, not the SVG's own — WebKit
+ * enforces this for SVGs loaded as images and icons, and a hash-pinned policy
+ * that only covers index.html refuses them. The symptom is a console error
+ * ("Refused to apply a stylesheet...") and a favicon that stops following
+ * prefers-color-scheme, with the page itself looking perfectly fine.
+ */
+export function svgStyleBlocks() {
+  const out = [];
+  for (const ref of localRefs()) {
+    if (!ref.endsWith(".svg") || !exists(ref)) continue;
+    for (const m of read(ref).matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)) {
+      out.push({ file: ref, body: m[1] });
+    }
+  }
+  return out;
+}

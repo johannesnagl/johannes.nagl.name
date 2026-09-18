@@ -5,15 +5,34 @@
 // --write to replace the meta tag in place. `npm test` compares the shipped
 // policy against a fresh computation, so forgetting this step fails the gate
 // rather than the live site.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 
 const PATH = new URL("../index.html", import.meta.url);
 const source = readFileSync(PATH, "utf8");
 
+const sha = (body) => `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`;
+
+const bodies = (text, tag) =>
+  [...text.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)</${tag}>`, "g"))].map((m) => m[1]);
+
+// A <style> inside an SVG the page references is governed by the PAGE's
+// style-src, not the SVG's own. WebKit enforces this for SVGs loaded as images
+// and icons: leave the hash out and the browser refuses the stylesheet, the
+// favicon stops following prefers-color-scheme, and the page itself looks fine
+// — so it is invisible unless you read the console. favicon.svg has one.
+const svgStyleBodies = () => {
+  const out = [];
+  for (const m of source.matchAll(/(?:href|src)="(\/[^"]+\.svg)"/g)) {
+    const file = new URL(`..${m[1]}`, import.meta.url);
+    if (existsSync(file)) out.push(...bodies(readFileSync(file, "utf8"), "style"));
+  }
+  return out;
+};
+
 const hashes = (tag) =>
-  [...source.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)</${tag}>`, "g"))]
-    .map((m) => `'sha256-${createHash("sha256").update(m[1], "utf8").digest("base64")}'`)
+  [...new Set([...bodies(source, tag), ...(tag === "style" ? svgStyleBodies() : [])])]
+    .map(sha)
     .join(" ");
 
 // frame-ancestors, report-uri and sandbox are IGNORED in a <meta> policy, and
