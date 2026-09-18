@@ -1,0 +1,31 @@
+{
+  "//": "Thresholds are gates, not aspirations. Every category here was fixed reactively at least once (de98985, 027f237, 4828d33, 356c236) before this file existed. Raise a number after the site clears it; never lower one to make a build pass.",
+  "// baseline": "Measured on 2026-09-18 against this commit, desktop preset: performance 1.00, accessibility 1.00, best-practices 1.00, seo 1.00, CLS 0.0002. The 0.95 floors leave room for runner variance; the 1.00 floors do not, because those two have no excuse for slipping.",
+  "// compression": "The CI job serves the site with a plain static server, which does not gzip, while GitHub Pages does. Performance is therefore measured pessimistically here, which is the safe direction.",
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 1 }],
+        "categories:performance": ["error", { "minScore": 0.95 }],
+        "categories:best-practices": ["error", { "minScore": 0.95 }],
+        "categories:seo": ["error", { "minScore": 1 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+
+        "// weighted-zero audits": "An audit can score 0 while its CATEGORY still scores 1, because Lighthouse weights some axe checks at zero. That is a green gate guarding nothing, and it already happened here: label-content-name-mismatch scored 0 on four links whose aria-label did not contain their visible text (WCAG 2.5.3) while accessibility read a clean 1.00. Assert those audits by name.",
+        "label-content-name-mismatch": ["error", { "minScore": 1 }],
+        "color-contrast": ["error", { "minScore": 1 }],
+        "heading-order": ["error", { "minScore": 1 }],
+        "html-has-lang": ["error", { "minScore": 1 }],
+        "meta-description": ["error", { "minScore": 1 }],
+        "robots-txt": ["error", { "minScore": 1 }],
+        "target-size": ["error", { "minScore": 1 }]
+      }
+    }
+  }
+}

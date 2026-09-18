@@ -1,0 +1,57 @@
+# The gate, as a pre-push signal. This workflow does NOT deploy: statichost.eu's
+# own builder does that when main moves. So a red run here is a warning that
+# arrives at roughly the same time as the deploy, not before it — treat the
+# local `npm test` as the real gate and this as the second opinion.
+#
+# There is deliberately no `paths:` filter. A gate only guards the paths it is
+# filtered on, and the classic failure is a dependency PR bumping an action SHA
+# that runs no checks and shows green. This repository is small enough that
+# running everything on everything costs less than a filter that is wrong once.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      # No `npm ci`: this repository has no dependencies and no lockfile, on
+      # purpose. See CLAUDE.md -> "Why there are no dependencies".
+      - run: npm test
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The site is static and needs no build, so serving the repository root
+      # serves the same bytes GitHub Pages does. Python is preinstalled on the
+      # runner, which keeps this job free of unpinned `npx` downloads.
+      - name: Serve the site
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 --directory . &
+          for _ in $(seq 1 30); do
+            curl -fsS -o /dev/null http://127.0.0.1:8080/ && exit 0
+            sleep 1
+          done
+          echo "the static server never came up" >&2
+          exit 1
+      - uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12.6.2
+        with:
+          urls: http://127.0.0.1:8080/
+          configPath: .github/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

@@ -1,0 +1,13 @@
+{
+  "name": "johannes-nagl-name",
+  "private": true,
+  "type": "module",
+  "description": "Tooling for the static site. The site itself is index.html and needs no build.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "indexnow": "./scripts/indexnow.sh"
+  }
+}
